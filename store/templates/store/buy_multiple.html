@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Buy Multiple Ingredients</title>
+</head>
+<body>
+    <h1>Selected Ingredients Review</h1>
+    <ul>
+        {% if selected_ingredients %}
+            {% for item in selected_ingredients %}
+                <li>Ingredient ID: {{ item.id }}, Quantity: {{ item.quantity }}</li>
+            {% endfor %}
+        {% else %}
+            <li>No ingredients selected.</li>
+        {% endif %}
+    </ul>
+
+    <!-- Add your checkout/buy flow here -->
+</body>
+</html>

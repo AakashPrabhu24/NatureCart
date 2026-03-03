@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Buy {{ ingredient.name }}</title>
+</head>
+<body>
+    <h1>Buy {{ ingredient.name }}</h1>
+    <p>Price: ₹{{ ingredient.price }}</p>
+
+    <form method="post" action="{% url 'add_to_cart_ingredient' ingredient.id %}">
+        {% csrf_token %}
+        <label for="quantity">Quantity:</label>
+        <input type="number" name="quantity" id="quantity" value="1" min="1" max="50">
+
+        <button type="submit">Add to Cart</button>
+    </form>
+</body>
+</html>

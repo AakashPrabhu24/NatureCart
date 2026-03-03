@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Checkout - NatureCart</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        :root {
+            --primary-green: #2d5a27;
+            --light-green: #4a7c59;
+            --cream: #f8f4e9;
+            --beige: #e6dfcc;
+            --dark-brown: #3e3a2a;
+            --light-brown: #8a7f68;
+            --white: #ffffff;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+            --header-height: 70px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: var(--dark-brown);
+            background-color: var(--cream);
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            color: var(--primary-green);
+        }
+
+        /* Header Styles - Matching home.html */
+        header {
+            background-color: var(--white);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            height: var(--header-height);
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 90%;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary-green);
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .logo i {
+            margin-right: 8px;
+            color: var(--light-green);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin: 0 15px;
+        }
+
+        nav ul li a {
+            font-weight: 500;
+            transition: var(--transition);
+            position: relative;
+            text-decoration: none;
+            color: var(--dark-brown);
+        }
+
+        nav ul li a:hover {
+            color: var(--light-green);
+        }
+
+        /* Main Container */
+        .checkout-wrapper {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* Progress Steps - Minimalistic */
+        .progress-container {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .progress-line {
+            position: absolute;
+            top: 25px;
+            left: 50px;
+            right: 50px;
+            height: 2px;
+            background: var(--beige);
+            z-index: 0;
+        }
+
+        .progress-line-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, var(--primary-green), var(--light-green));
+            transition: var(--transition);
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--white);
+            border: 3px solid var(--light-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: var(--light-green);
+            transition: var(--transition);
+        }
+
+        .step.active .step-circle {
+            background: var(--light-green);
+            color: var(--white);
+            box-shadow: 0 4px 12px rgba(74, 124, 89, 0.4);
+        }
+
+        .step-label {
+            font-size: 14px;
+            color: var(--light-brown);
+            font-weight: 500;
+        }
+
+        /* Two Column Layout */
+        .checkout-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+        }
+
+        /* Order Summary - Right Column */
+        .order-summary {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            height: fit-content;
+            position: sticky;
+            top: 90px;
+        }
+
+        .order-summary h3 {
+            font-size: 24px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--beige);
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--beige);
+        }
+
+        .order-item:last-of-type {
+            border-bottom: 2px solid var(--beige);
+            margin-bottom: 15px;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 500;
+            color: var(--dark-brown);
+            margin-bottom: 5px;
+        }
+
+        .item-quantity {
+            font-size: 14px;
+            color: var(--light-brown);
+        }
+
+        .item-price {
+            font-weight: 600;
+            color: var(--primary-green);
+            white-space: nowrap;
+            margin-left: 15px;
+        }
+
+        .remove-btn {
+            background: transparent;
+            border: none;
+            color: var(--light-brown);
+            cursor: pointer;
+            font-size: 12px;
+            padding: 5px 10px;
+            transition: var(--transition);
+            margin-top: 5px;
+        }
+
+        .remove-btn:hover {
+            color: #e31b23;
+        }
+
+        .summary-totals {
+            margin-top: 20px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            font-size: 15px;
+        }
+
+        .summary-row.total {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary-green);
+            padding-top: 20px;
+            border-top: 2px solid var(--beige);
+            margin-top: 10px;
+        }
+
+        /* Payment Section - Left Column */
+        .payment-section {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: var(--shadow);
+        }
+
+        .payment-section h3 {
+            font-size: 28px;
+            margin-bottom: 30px;
+        }
+
+        .payment-details {
+            background: linear-gradient(135deg, rgba(74, 124, 89, 0.05), rgba(45, 90, 39, 0.05));
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 4px solid var(--light-green);
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            font-size: 15px;
+        }
+
+        .detail-label {
+            color: var(--light-brown);
+            font-weight: 500;
+        }
+
+        .detail-value {
+            color: var(--dark-brown);
+            font-weight: 600;
+        }
+
+        /* Pay Button */
+        .pay-button {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary-green), var(--light-green));
+            color: var(--white);
+            border: none;
+            padding: 18px 40px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 8px 20px rgba(45, 90, 39, 0.3);
+        }
+
+        .pay-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(45, 90, 39, 0.4);
+        }
+
+        .pay-button:active {
+            transform: translateY(0);
+        }
+
+        .pay-button i {
+            font-size: 20px;
+        }
+
+        /* Security Badge */
+        .security-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid var(--beige);
+        }
+
+        .badge-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--light-brown);
+            font-size: 14px;
+        }
+
+        .badge-item i {
+            color: var(--light-green);
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--beige);
+            border-top: 4px solid var(--light-green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Messages */
+        .message {
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        .message.success {
+            background: #e8f5e8;
+            color: #2e7d32;
+            border-left: 4px solid #4caf50;
+        }
+
+        .message.error {
+            background: #ffebee;
+            color: #c62828;
+            border-left: 4px solid #f44336;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark-brown);
+            color: var(--white);
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 80px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .checkout-content {
+                grid-template-columns: 1fr;
+            }
+
+            .order-summary {
+                position: static;
+                order: -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-container {
+                flex-wrap: wrap;
+            }
+
+            nav ul {
+                width: 100%;
+                margin-top: 15px;
+                justify-content: center;
+            }
+
+            nav ul li {
+                margin: 0 10px;
+            }
+
+            .progress-steps {
+                max-width: 100%;
+            }
+
+            .step-label {
+                font-size: 12px;
+            }
+
+            .step-circle {
+                width: 40px;
+                height: 40px;
+                font-size: 14px;
+            }
+
+            .payment-section {
+                padding: 25px 20px;
+            }
+
+            .security-badge {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .checkout-wrapper {
+                padding: 0 15px;
+            }
+
+            .order-summary, .payment-section {
+                padding: 20px 15px;
+            }
+
+            .payment-section h3 {
+                font-size: 24px;
+            }
+
+            .pay-button {
+                padding: 16px 30px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <a href="{% url 'home' %}" class="logo">
+                <i class="fas fa-leaf"></i>
+                NatureCart
+            </a>
+            
+            <nav>
+                <ul>
+                    <li><a href="{% url 'home' %}">Home</a></li>
+                    <li><a href="{% url 'products' %}">Products</a></li>
+                    {% if user.is_authenticated %}
+                        <li><a href="{% url 'cart_view' %}">Cart</a></li>
+                        <li><a href="{% url 'logout' %}">Logout</a></li>
+                    {% else %}
+                        <li><a href="{% url 'login' %}">Login</a></li>
+                        <li><a href="{% url 'register' %}">Register</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="checkout-wrapper">
+        <!-- Progress Steps -->
+        <div class="progress-container">
+            <div class="progress-steps">
+                <div class="progress-line">
+                    <div class="progress-line-fill"></div>
+                </div>
+                <div class="step active">
+                    <div class="step-circle">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <span class="step-label">Cart</span>
+                </div>
+                <div class="step active">
+                    <div class="step-circle">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <span class="step-label">Payment</span>
+                </div>
+                <div class="step">
+                    <div class="step-circle">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <span class="step-label">Complete</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Two Column Layout -->
+        <div class="checkout-content">
+            <!-- Payment Section (Left) -->
+            <div class="payment-section">
+                <h3>Complete Your Order</h3>
+
+                <div class="payment-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Order ID:</span>
+                        <span class="detail-value">{{ payment.id }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Customer:</span>
+                        <span class="detail-value">{{ request.user.email }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Payment Method:</span>
+                        <span class="detail-value">Razorpay Gateway</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Amount Due:</span>
+                        <span class="detail-value" style="color: var(--primary-green); font-size: 20px;">₹{{ amount|floatformat:2 }}</span>
+                    </div>
+                </div>
+
+                <button id="pay-button" class="pay-button">
+                    <i class="fas fa-lock"></i>
+                    <span>Pay Securely Now</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+
+                <div class="loading-spinner" id="loading-spinner"></div>
+
+                <div class="security-badge">
+                    <div class="badge-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>SSL Secured</span>
+                    </div>
+                    <div class="badge-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Safe Payment</span>
+                    </div>
+                    <div class="badge-item">
+                        <i class="fas fa-lock"></i>
+                        <span>Encrypted</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary (Right) -->
+            <div class="order-summary">
+                <h3>Order Summary</h3>
+
+                <!-- Products -->
+                {% if products_total > 0 %}
+                    {% for item in cart.items.all %}
+                    <div class="order-item">
+                        <div class="item-info">
+                            <div class="item-name">{{ item.product.name }}</div>
+                            <div class="item-quantity">Quantity: {{ item.quantity }}</div>
+                            <form method="post" action="{% url 'remove_from_cart' item.id %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="remove-btn">
+                                    <i class="fas fa-times"></i> Remove
+                                </button>
+                            </form>
+                        </div>
+                        <div class="item-price">₹{{ item.line_total|floatformat:2 }}</div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Ingredients -->
+                {% if ingredients_total > 0 %}
+                    {% for ingredient_item in cart_ingredients %}
+                    <div class="order-item">
+                        <div class="item-info">
+                            <div class="item-name">
+                                <i class="fas fa-leaf" style="color: var(--light-green); margin-right: 5px;"></i>
+                                {{ ingredient_item.ingredient.name }}
+                            </div>
+                            <div class="item-quantity">Quantity: {{ ingredient_item.quantity }}</div>
+                            <form method="post" action="{% url 'remove_ingredient_from_cart' ingredient_item.id %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="remove-btn">
+                                    <i class="fas fa-times"></i> Remove
+                                </button>
+                            </form>
+                        </div>
+                        <div class="item-price">₹{{ ingredient_item.total_price|floatformat:2 }}</div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Totals -->
+                <div class="summary-totals">
+                    <div class="summary-row">
+                        <span>Subtotal:</span>
+                        <span>₹{{ subtotal|floatformat:2 }}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Tax (GST 18%):</span>
+                        <span>₹{{ tax|floatformat:2 }}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Shipping:</span>
+                        <span>₹{{ shipping|floatformat:2 }}</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total:</span>
+                        <span>₹{{ amount|floatformat:2 }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>NatureCart © 2025 - Authentic Ayurvedic Wellness</p>
+    </footer>
+
+    <script>
+        var options = {
+            "key": "{{ key_id }}",
+            "amount": "{{ amount_paise }}", 
+            "currency": "INR",
+            "order_id": "{{ payment.id }}",
+            "handler": function(response){
+                document.getElementById('loading-spinner').style.display = 'block';
+                document.getElementById('pay-button').style.display = 'none';
+                
+                fetch("{% url 'payment_handler' %}", {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded', 
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: `razorpay_order_id=${response.razorpay_order_id}&razorpay_payment_id=${response.razorpay_payment_id}&razorpay_signature=${response.razorpay_signature}`
+                }).then(response => {
+                    document.getElementById('loading-spinner').style.display = 'none';
+                    document.getElementById('pay-button').style.display = 'flex';
+                    
+                    if(response.ok){
+                        const successMsg = document.createElement('div');
+                        successMsg.className = 'message success';
+                        successMsg.innerHTML = '<i class="fas fa-check-circle"></i> Payment Successful! Redirecting to home...';
+                        document.querySelector('.checkout-wrapper').insertBefore(successMsg, document.querySelector('.checkout-wrapper').firstChild);
+                        
+                        setTimeout(() => {
+                            window.location.href = '{% url "home" %}';
+                        }, 2000);
+                    } else {
+                        const errorMsg = document.createElement('div');
+                        errorMsg.className = 'message error';
+                        errorMsg.innerHTML = '<i class="fas fa-exclamation-circle"></i> Payment verification failed. Please contact support.';
+                        document.querySelector('.checkout-wrapper').insertBefore(errorMsg, document.querySelector('.checkout-wrapper').firstChild);
+                    }
+                }).catch(error => {
+                    document.getElementById('loading-spinner').style.display = 'none';
+                    document.getElementById('pay-button').style.display = 'flex';
+                    
+                    const errorMsg = document.createElement('div');
+                    errorMsg.className = 'message error';
+                    errorMsg.innerHTML = '<i class="fas fa-exclamation-circle"></i> Network error. Please try again.';
+                    document.querySelector('.checkout-wrapper').insertBefore(errorMsg, document.querySelector('.checkout-wrapper').firstChild);
+                });
+            },
+            "prefill": {
+                "email": "{{ request.user.email }}",
+                "contact": ""
+            },
+            "theme": {
+                "color": "#2d5a27"
+            },
+            "modal": {
+                "ondismiss": function(){
+                    console.log('Payment cancelled by user');
+                }
+            }
+        };
+        
+        var rzp = new Razorpay(options);
+        
+        document.getElementById('pay-button').onclick = function(e){
+            e.preventDefault();
+            rzp.open();
+        }
+        
+        rzp.on('payment.failed', function (response){
+            const errorMsg = document.createElement('div');
+            errorMsg.className = 'message error';
+            errorMsg.innerHTML = '<i class="fas fa-exclamation-circle"></i> Payment failed: ' + response.error.description;
+            document.querySelector('.checkout-wrapper').insertBefore(errorMsg, document.querySelector('.checkout-wrapper').firstChild);
+        });
+    </script>
+</body>
+</html>
