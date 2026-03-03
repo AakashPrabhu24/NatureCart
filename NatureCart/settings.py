@@ -10,7 +10,7 @@ SECRET_KEY = 'django-insecure-b7s8cmd=cryoxpt$q+%!u!nc8g1l=a^fc)#o*bir92lskoa6oe
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['naturecart-btlp.onrender.com']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -77,11 +77,9 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Static files
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
