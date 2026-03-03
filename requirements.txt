@@ -1,2 +1,2 @@
-Django==5.2.11
-razorpay==3.4.0
+Django==4.2.7
+razorpay==2.0.0
